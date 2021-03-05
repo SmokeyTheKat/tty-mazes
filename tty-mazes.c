@@ -3,24 +3,24 @@
 #include <time.h>
 #include <ddcPrint.h>
 
-#define WIDTH 50
-#define HEIGHT 30
+long WIDTH;
+long HEIGHT;
 
-void map_print(int map[WIDTH][WIDTH]);
-char touching(int map[HEIGHT][WIDTH], int x, int y);
-void right(int map[HEIGHT][WIDTH], int x, int y);
-void left(int map[HEIGHT][WIDTH], int x, int y);
-void up(int map[HEIGHT][WIDTH], int x, int y);
-void down(int map[HEIGHT][WIDTH], int x, int y);
-void set(int map[HEIGHT][WIDTH], int x, int y);
+void map_print(int** map);
+char touching(int** map, int x, int y);
+void right(int** map, int x, int y);
+void left(int** map, int x, int y);
+void up(int** map, int x, int y);
+void down(int** map, int x, int y);
+void set(int** map, int x, int y);
 
-void map_draw_spot(int map[HEIGHT][WIDTH], int x, int y)
+void map_draw_spot(int** map, int x, int y)
 {
 	cursor_move_to(y*2, x);
 	ddPrintf("\x1b[38;2;0;0;255m██");
 }
 
-void map_print(int map[HEIGHT][WIDTH])
+void map_print(int** map)
 {
 	cursor_clear();
 	cursor_home();
@@ -39,7 +39,7 @@ void map_print(int map[HEIGHT][WIDTH])
 	printf("\n");
 }
 
-char touching(int map[HEIGHT][WIDTH], int x, int y)
+char touching(int** map, int x, int y)
 {
 	if (x < 0 || x >= HEIGHT || y < 0 || y >= WIDTH) return 1;
 	int total = 0;
@@ -50,30 +50,30 @@ char touching(int map[HEIGHT][WIDTH], int x, int y)
 	return total > 1;
 }
 
-void right(int map[HEIGHT][WIDTH], int x, int y)
+void right(int** map, int x, int y)
 { if (!touching(map, x+1, y)) set(map, x+1, y); }
-void left(int map[HEIGHT][WIDTH], int x, int y)
+void left(int** map, int x, int y)
 { if (!touching(map, x-1, y)) set(map, x-1, y); }
-void up(int map[HEIGHT][WIDTH], int x, int y)
+void up(int** map, int x, int y)
 { if (!touching(map, x, y-1)) set(map, x, y-1); }
-void down(int map[HEIGHT][WIDTH], int x, int y)
+void down(int** map, int x, int y)
 { if (!touching(map, x, y+1)) set(map, x, y+1); }
 
-void shuffle(void (*directions[4])(int map[HEIGHT][WIDTH], int x, int y))
+void shuffle(void (*directions[4])(int** map, int x, int y))
 {
 	long n = 4;
 	for (int i = 0; i < n; i++) 
 	{
 		size_t j = rand() % 4;
-		void (*tmp)(int map[HEIGHT][WIDTH], int x, int y) = directions[j];
+		void (*tmp)(int** map, int x, int y) = directions[j];
 		directions[j] = directions[i];
 		directions[i] = tmp;
 	}
 }
 
-void set(int map[HEIGHT][WIDTH], int x, int y)
+void set(int** map, int x, int y)
 {
-	void (*directions[4])(int map[HEIGHT][WIDTH], int x, int y) = {
+	void (*directions[4])(int** map, int x, int y) = {
 		right, left, up, down,
 	};
 	shuffle(directions);
@@ -88,7 +88,7 @@ void set(int map[HEIGHT][WIDTH], int x, int y)
 	}
 }
 
-char solve(int map[HEIGHT][WIDTH], int x, int y)
+char solve(int** map, int x, int y)
 {
 	map_draw_spot(map, x, y);
 	usleep(10000);
@@ -108,9 +108,15 @@ char solve(int map[HEIGHT][WIDTH], int x, int y)
 int main(void)
 {
 	srand(time(0));
+	cursor_clear();
+	cursor_home();
+	WIDTH = cursor_get_width()/2;
+	HEIGHT = cursor_get_height()-4;
 	while (1)
 	{
-		int map[HEIGHT][WIDTH];
+		int** map = malloc(sizeof(int*)*HEIGHT);
+		for (int i = 0; i < HEIGHT; i++)
+			map[i] = malloc(sizeof(int)*WIDTH);
 		for (int i = 0; i < HEIGHT; i++)
 			for (int j = 0; j <WIDTH; j++)
 				map[i][j] = 0;
