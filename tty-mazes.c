@@ -28,15 +28,13 @@ void map_print(int** map)
 	{
 		for (int j = 0; j <WIDTH; j++)
 		{
-			if (map[i][j] == 3) printf("\x1b[38;2;255;0;0m██");
-			else if (map[i][j] == 2) printf("\x1b[38;2;0;0;255m██");
-			else if (map[i][j] == 1) printf("  ");
-			else if (map[i][j] == 0) printf("\x1b[38;2;255;255;0m██");
+			if (map[i][j] == 3) ddPrints("\x1b[38;2;255;0;0m██");
+			else if (map[i][j] == 2) ddPrints("\x1b[38;2;0;0;255m██");
+			else if (map[i][j] == 1) ddPrints("  ");
+			else if (map[i][j] == 0) ddPrints("\x1b[38;2;255;255;0m██");
 		}
-		printf("\n");
+		if (i+1 < HEIGHT) ddPrints("\n");
 	}
-	printf("\n");
-	printf("\n");
 }
 
 char touching(int** map, int x, int y)
@@ -111,7 +109,7 @@ int main(void)
 	cursor_clear();
 	cursor_home();
 	WIDTH = cursor_get_width()/2;
-	HEIGHT = cursor_get_height()-4;
+	HEIGHT = cursor_get_height()-0;
 	while (1)
 	{
 		int** map = malloc(sizeof(int*)*HEIGHT);
